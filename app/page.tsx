@@ -8,6 +8,7 @@ export default function HomePage() {
     <main style={{ minHeight: "100vh" }}>
       {/* Container: identical max-width and padding as Nav — aligns perfectly */}
       <div
+        className="max-sm:!px-5 max-sm:!pt-24"
         style={{ maxWidth: "1200px", margin: "0 auto", padding: "96px 48px 0" }}
       >
         {projects.map((project, index) => (
@@ -15,6 +16,7 @@ export default function HomePage() {
         ))}
 
         <footer
+          className="max-sm:!px-5 max-sm:!py-10"
           style={{
             paddingTop: "3rem",
             paddingBottom: "3rem",

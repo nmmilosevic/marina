@@ -85,6 +85,7 @@ export default function TransitionOverlay() {
         pointerEvents: "none",
         display: "none",
         clipPath: "inset(0 100% 0 0)",
+        willChange: "clip-path",
       }}
     />
   );

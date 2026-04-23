@@ -146,7 +146,7 @@ export default function ProjectPage({ params }: PageProps) {
   return (
     <main className="min-h-screen">
       {/* Hero, full viewport */}
-      <div className="relative w-full overflow-hidden" style={{ height: "100svh" }}>
+      <div className="relative w-full overflow-hidden" style={{ height: "100svh", background: "#111111" }}>
         <Image
           src={project.heroImage}
           alt={project.title}

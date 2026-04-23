@@ -286,6 +286,7 @@ export default function AboutPage() {
       {/* ── Hero manifesto ─────────────────────────────────────────────── */}
       <section
         ref={heroRef}
+        className="max-sm:!px-5 max-sm:!pt-28 max-sm:!pb-16"
         style={{
           maxWidth: "1200px",
           margin: "0 auto",
@@ -311,6 +312,7 @@ export default function AboutPage() {
           custom={0.35}
           initial="hidden"
           animate={isHeroInView ? "visible" : "hidden"}
+          className="flex-wrap gap-8 max-sm:flex-col max-sm:gap-6"
           style={{ marginTop: "4rem", display: "flex", gap: "4rem" }}
         >
           <div>
@@ -387,6 +389,7 @@ export default function AboutPage() {
 
       {/* ── Philosophy ─────────────────────────────────────────────────── */}
       <section
+        className="max-sm:!px-5 max-sm:!py-16"
         style={{
           borderTop: "1px solid var(--color-line)",
           maxWidth: "1200px",
@@ -401,7 +404,7 @@ export default function AboutPage() {
               gridTemplateColumns: "1fr 2fr",
               gap: "4rem",
             }}
-            className="max-md:grid-cols-1"
+            className="max-md:!grid-cols-1 max-md:!gap-8"
           >
             <div>
               <SectionLabel>Philosophy</SectionLabel>
@@ -457,6 +460,7 @@ export default function AboutPage() {
 
       {/* ── Process ────────────────────────────────────────────────────── */}
       <section
+        className="max-sm:!px-5 max-sm:!py-16"
         style={{
           borderTop: "1px solid var(--color-line)",
           maxWidth: "1200px",
@@ -474,7 +478,7 @@ export default function AboutPage() {
             gridTemplateColumns: "repeat(2, 1fr)",
             gap: "1.5rem",
           }}
-          className="max-md:grid-cols-1"
+          className="max-md:!grid-cols-1"
         >
           {processPhases.map((phase) => (
             <PhaseCard key={phase.index} phase={phase} />
@@ -484,6 +488,7 @@ export default function AboutPage() {
 
       {/* ── Services ───────────────────────────────────────────────────── */}
       <section
+        className="max-sm:!px-5 max-sm:!py-16"
         style={{
           borderTop: "1px solid var(--color-line)",
           maxWidth: "1200px",
@@ -501,7 +506,7 @@ export default function AboutPage() {
             gridTemplateColumns: "repeat(3, 1fr)",
             gap: "2rem",
           }}
-          className="max-md:grid-cols-2 max-sm:grid-cols-1"
+          className="max-sm:!grid-cols-1 max-md:!grid-cols-2"
         >
           {services.map((service) => (
             <ServiceCard key={service.label} service={service} />
@@ -512,7 +517,7 @@ export default function AboutPage() {
       {/* ── Collaborators marquee ───────────────────────────────────────── */}
       <div
         style={{ marginTop: "5rem" }}
-        className="py-10 border-t border-b border-[var(--color-line)] overflow-hidden"
+        className="py-10 border-t border-b border-[var(--color-line)] overflow-hidden max-sm:mt-10"
       >
         <div className="flex gap-0 animate-marquee whitespace-nowrap">
           {[...collaborators, ...collaborators, ...collaborators, ...collaborators].map((name, i) => (
