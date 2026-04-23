@@ -1,26 +1,150 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg: #F5F2ED;
+  --color-ink: #111111;
+  --color-muted: #8A8070;
+  --color-line: #D9D3C8;
+  --color-accent: #C8A882;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: #F5F2ED;
+  --color-ink: #111111;
+  --color-muted: #8A8070;
+  --color-line: #D9D3C8;
+  --color-accent: #C8A882;
+  --font-display: var(--font-hanken);
+  --font-body: var(--font-hanken);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Alias both font vars to Hanken Grotesk */
+:root {
+  --font-cormorant: var(--font-hanken);
+  --font-dm-sans: var(--font-hanken);
+}
+
+/* Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: auto;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-hanken, sans-serif);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* Hide native cursor on fine-pointer devices */
+@media (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-ink);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-line);
+  border-radius: 2px;
+}
+
+/* Link underline animation */
+.link-underline {
+  position: relative;
+  text-decoration: none;
+}
+.link-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+/* Lenis smooth scroll */
+html.lenis {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Pulse animation for scroll indicator */
+@keyframes pulse-gentle {
+  0%, 100% { opacity: 0.4; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(5px); }
+}
+.animate-pulse-gentle {
+  animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+/* Marquee */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+/* Font display class */
+.font-display {
+  font-family: var(--font-hanken, sans-serif);
+}
+
+/* Nav links — no underline, font weight animates on hover */
+.nav-underline {
+  position: relative;
+  display: inline-block;
+  text-decoration: none !important;
+}
+.nav-underline::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Font weight follows the underline — pure CSS, no React state */
+.nav-weight {
+  font-variation-settings: 'wght' 300;
+  transition: font-variation-settings 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.nav-underline:hover .nav-weight {
+  font-variation-settings: 'wght' 560;
 }
