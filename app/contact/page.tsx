@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import Marquee from "@/components/Marquee";
 
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
@@ -243,6 +244,7 @@ export default function ContactPage() {
                   <div style={{ paddingTop: "0.5rem" }}>
                     <button
                       type="submit"
+                      className="max-sm:!w-full"
                       style={{
                         fontFamily: "var(--font-hanken, sans-serif)",
                         fontSize: "0.625rem",
@@ -270,6 +272,45 @@ export default function ContactPage() {
 
         </div>
       </div>
+
+      <div style={{ marginTop: "5rem" }}>
+        <Marquee />
+      </div>
+
+      <footer
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: "3rem 48px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+        className="max-sm:!px-5"
+      >
+        <span
+          style={{
+            fontFamily: "var(--font-hanken, sans-serif)",
+            fontSize: "0.875rem",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            color: "var(--color-ink)",
+          }}
+        >
+          Marina Vanni
+        </span>
+        <span
+          style={{
+            fontFamily: "var(--font-hanken, sans-serif)",
+            fontSize: "0.625rem",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "var(--color-muted)",
+          }}
+        >
+          Marbella, 2026
+        </span>
+      </footer>
     </main>
   );
 }

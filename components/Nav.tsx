@@ -10,6 +10,7 @@ const navLinks = [
   { label: "Work",         href: "/" },
   { label: "Studio",       href: "/about" },
   { label: "Marina Vanni", href: "/marina-vanni" },
+  { label: "Paintings",    href: "/paintings" },
   { label: "Contact",      href: "/contact" },
 ];
 
@@ -28,14 +29,7 @@ export default function Nav() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close menu on route change
   useEffect(() => { setMenuOpen(false); }, [pathname]);
-
-  // Lock body scroll when menu is open
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [menuOpen]);
 
   async function handleNavClick(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
     if (href === pathname) return;
@@ -46,22 +40,18 @@ export default function Nav() {
   }
 
   const inkColor = "var(--nav-color-override, var(--color-ink))";
+  const floated = scrolled || menuOpen;
 
   return (
     <>
+      {/* ── Desktop nav ──────────────────────────────────────────────────── */}
       <header
-        className="fixed top-0 left-0 right-0 z-40"
+        className="fixed top-0 left-0 right-0 z-40 hidden sm:block"
         style={{ fontFamily: "var(--font-hanken, sans-serif)" }}
       >
-        {/* ── Desktop nav (sm and up) ─────────────────────────────────── */}
         <div
-          className="hidden sm:flex items-center justify-between"
-          style={{
-            maxWidth: "1200px",
-            margin: "0 auto",
-            height: "96px",
-            padding: "0 48px",
-          }}
+          className="flex items-center justify-between"
+          style={{ maxWidth: "1200px", margin: "0 auto", height: "96px", padding: "0 48px" }}
         >
           <Link
             href="/"
@@ -114,18 +104,39 @@ export default function Nav() {
             ))}
           </nav>
         </div>
+      </header>
 
-        {/* ── Mobile nav (below sm) ───────────────────────────────────── */}
+      {/* ── Mobile nav ───────────────────────────────────────────────────── */}
+      <div
+        className="fixed top-0 left-0 right-0 z-40 sm:hidden"
+        style={{ fontFamily: "var(--font-hanken, sans-serif)" }}
+      >
+        {/* Box 1: logo + burger */}
         <div
-          className="flex sm:hidden items-center justify-between"
+          className="flex items-center justify-between"
           style={{
-            margin: scrolled ? "16px 16px 0" : "0",
-            padding: scrolled ? "12px 16px" : "20px 20px",
-            backgroundColor: scrolled ? "var(--color-bg)" : "transparent",
-            transition: "margin 350ms ease, padding 350ms ease, background-color 350ms ease",
+            margin: floated ? "16px 20px 0" : "0",
+            backgroundColor: floated ? "#ffffff" : "transparent",
+            padding: floated ? "12px 16px" : "20px 20px",
+            transition: "margin 350ms ease, background-color 350ms ease, padding 350ms ease",
           }}
         >
-          {/* Burger — left */}
+          <Link
+            href="/"
+            onClick={(e) => handleNavClick(e, "/")}
+            style={{
+              fontSize: "0.9625rem",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              color: floated ? "var(--color-ink)" : inkColor,
+              transition: "color 200ms ease",
+              lineHeight: 1,
+            }}
+          >
+            <span className="nav-weight">Marina Vanni</span>
+          </Link>
+
           <button
             onClick={() => setMenuOpen((o) => !o)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -137,89 +148,75 @@ export default function Nav() {
               display: "flex",
               flexDirection: "column",
               gap: "5px",
-              zIndex: 50,
             }}
           >
-            <span style={{
-              display: "block", width: "22px", height: "1px",
-              backgroundColor: menuOpen ? "var(--color-ink)" : inkColor,
-              transition: "transform 300ms ease, background-color 200ms ease",
-              transform: menuOpen ? "translateY(6px) rotate(45deg)" : "none",
-            }} />
-            <span style={{
-              display: "block", width: "22px", height: "1px",
-              backgroundColor: menuOpen ? "var(--color-ink)" : inkColor,
-              transition: "opacity 300ms ease, background-color 200ms ease",
-              opacity: menuOpen ? 0 : 1,
-            }} />
-            <span style={{
-              display: "block", width: "22px", height: "1px",
-              backgroundColor: menuOpen ? "var(--color-ink)" : inkColor,
-              transition: "transform 300ms ease, background-color 200ms ease",
-              transform: menuOpen ? "translateY(-6px) rotate(-45deg)" : "none",
-            }} />
-          </button>
-
-          {/* Logo — right */}
-          <Link
-            href="/"
-            onClick={(e) => handleNavClick(e, "/")}
-            style={{
-              fontSize: "0.875rem",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              textDecoration: "none",
-              color: menuOpen ? "var(--color-ink)" : inkColor,
-              transition: "color 200ms ease",
-              lineHeight: 1,
-            }}
-          >
-            <span className="nav-weight">Marina Vanni</span>
-          </Link>
-        </div>
-      </header>
-
-      {/* ── Mobile full-screen menu ─────────────────────────────────────── */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease: EASE }}
-            className="fixed inset-0 z-30 sm:hidden"
-            style={{ backgroundColor: "var(--color-bg)", paddingTop: "100px", paddingLeft: "32px", paddingRight: "32px" }}
-          >
-            {navLinks.map((link, i) => (
-              <motion.div
-                key={link.href}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
-                transition={{ duration: 0.35, ease: EASE, delay: i * 0.06 }}
-                style={{ borderBottom: "1px solid var(--color-line)" }}
-              >
-                <Link
-                  href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
-                  style={{
-                    display: "block",
-                    fontFamily: "var(--font-hanken, sans-serif)",
-                    fontSize: "2.25rem",
-                    fontWeight: 300,
-                    letterSpacing: "-0.02em",
-                    color: "var(--color-ink)",
-                    textDecoration: "none",
-                    padding: "1.25rem 0",
-                  }}
-                >
-                  {link.label}
-                </Link>
-              </motion.div>
+            {[
+              { transform: menuOpen ? "translateY(6px) rotate(45deg)" : "none" },
+              { opacity: menuOpen ? 0 : 1 },
+              { transform: menuOpen ? "translateY(-6px) rotate(-45deg)" : "none" },
+            ].map((extra, i) => (
+              <span
+                key={i}
+                style={{
+                  display: "block",
+                  width: "22px",
+                  height: "1px",
+                  backgroundColor: floated ? "var(--color-ink)" : inkColor,
+                  transition: "transform 300ms ease, opacity 300ms ease, background-color 200ms ease",
+                  ...extra,
+                }}
+              />
             ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </button>
+        </div>
+
+        {/* Box 2: nav links — separate white bg, 2px below box 1 */}
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.38, ease: EASE }}
+              style={{
+                overflow: "hidden",
+                margin: "2px 20px 0",
+                backgroundColor: "#ffffff",
+              }}
+            >
+              <div style={{ padding: "4px 16px 16px" }}>
+                {navLinks.map((link, i) => (
+                  <motion.div
+                    key={link.href}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ delay: i * 0.05, duration: 0.28, ease: EASE }}
+                  >
+                    <Link
+                      href={link.href}
+                      onClick={(e) => handleNavClick(e, link.href)}
+                      style={{
+                        display: "block",
+                        fontFamily: "var(--font-hanken, sans-serif)",
+                        fontSize: "0.8125rem",
+                        letterSpacing: "0.18em",
+                        textTransform: "uppercase",
+                        fontWeight: 600,
+                        color: "var(--color-ink)",
+                        textDecoration: "none",
+                        padding: "12px 0",
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </>
   );
 }

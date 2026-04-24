@@ -2,6 +2,7 @@
 
 import { projects } from "@/data/projects";
 import ProjectRow from "@/components/ProjectRow";
+import Marquee from "@/components/Marquee";
 
 export default function HomePage() {
   return (
@@ -14,42 +15,46 @@ export default function HomePage() {
         {projects.map((project, index) => (
           <ProjectRow key={project.slug} project={project} index={index} />
         ))}
+      </div>
 
-        <footer
-          className="max-sm:!px-5 max-sm:!py-10"
+      <div style={{ marginTop: "4rem" }}>
+        <Marquee />
+      </div>
+
+      <footer
+        className="max-sm:!px-5 max-sm:!py-10"
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: "3rem 48px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <span
           style={{
-            paddingTop: "3rem",
-            paddingBottom: "3rem",
-            marginTop: "4rem",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            fontFamily: "var(--font-hanken, sans-serif)",
+            fontSize: "0.875rem",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            color: "var(--color-ink)",
           }}
         >
-          <span
-            style={{
-              fontFamily: "var(--font-hanken, sans-serif)",
-              fontSize: "0.875rem",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              color: "var(--color-ink)",
-            }}
-          >
-            Marina Vanni
-          </span>
-          <span
-            style={{
-              fontFamily: "var(--font-hanken, sans-serif)",
-              fontSize: "0.625rem",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "var(--color-muted)",
-            }}
-          >
-            Marbella &mdash; 2026
-          </span>
-        </footer>
-      </div>
+          Marina Vanni
+        </span>
+        <span
+          style={{
+            fontFamily: "var(--font-hanken, sans-serif)",
+            fontSize: "0.625rem",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "var(--color-muted)",
+          }}
+        >
+          Marbella &mdash; 2026
+        </span>
+      </footer>
     </main>
   );
 }

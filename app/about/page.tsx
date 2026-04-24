@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { motion, useInView, useMotionValue, useSpring } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
+import Marquee from "@/components/Marquee";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -34,31 +35,42 @@ const processPhases = [
 ];
 
 const services = [
-  { label: "Interior Architecture", seed: "svc-interior-arch-mv" },
-  { label: "Space Planning", seed: "svc-space-plan-mv" },
-  { label: "Material Specification", seed: "svc-material-spec-mv" },
-  { label: "Lighting Design", seed: "svc-lighting-mv" },
-  { label: "Furniture & Object Selection", seed: "svc-furniture-mv" },
-  { label: "Project Management", seed: "svc-project-mgmt-mv" },
-];
-
-const collaborators = [
-  "Cassina",
-  "Kettal",
-  "Molteni&C",
-  "Flos",
-  "Living Divani",
-  "Paola Lenti",
-  "B&B Italia",
-  "Poliform",
-  "Dedar",
-  "Pierre Frey",
-  "Rubelli",
-  "Loro Piana",
-  "Hermès Maison",
-  "Fornasetti",
-  "Liaigre",
-  "Frette",
+  {
+    label: "Interior Architecture",
+    seed: "svc-interior-arch-mv",
+    descriptor: "Space & Structure",
+    description: "Full spatial redesign — walls, openings, volumes. We work from the bones outward, ensuring every structural decision serves both light and life.",
+  },
+  {
+    label: "Space Planning",
+    seed: "svc-space-plan-mv",
+    descriptor: "Flow & Proportion",
+    description: "Circulation, proportion, and the relationship between rooms. We map how a space is lived in across the day before a single object is placed.",
+  },
+  {
+    label: "Material Specification",
+    seed: "svc-material-spec-mv",
+    descriptor: "Surface & Texture",
+    description: "Stone, plaster, timber, linen — each surface chosen for its behaviour in specific light, its honesty, and its capacity to age with grace.",
+  },
+  {
+    label: "Lighting Design",
+    seed: "svc-lighting-mv",
+    descriptor: "Atmosphere & Mood",
+    description: "Layered natural and artificial light as a design material. We consider the quality of light at every hour, not just at noon.",
+  },
+  {
+    label: "Furniture & Objects",
+    seed: "svc-furniture-mv",
+    descriptor: "Form & Craft",
+    description: "A considered edit of furniture, textiles, and objects — sourced from long-standing collaborators and ateliers across Europe.",
+  },
+  {
+    label: "Project Management",
+    seed: "svc-project-mgmt-mv",
+    descriptor: "Process & Precision",
+    description: "Full oversight from first drawing to final placement. We remain present at every stage, ensuring intention survives execution.",
+  },
 ];
 
 // ─── Animation config ─────────────────────────────────────────────────────────
@@ -137,17 +149,18 @@ function RevealSection({
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p
+    <h2
       style={{
         fontFamily: "var(--font-hanken, sans-serif)",
-        fontSize: "0.625rem",
-        letterSpacing: "0.2em",
-        textTransform: "uppercase",
-        color: "var(--color-muted)",
+        fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
+        fontWeight: 300,
+        letterSpacing: "-0.03em",
+        color: "var(--color-ink)",
+        lineHeight: 1.1,
       }}
     >
       {children}
-    </p>
+    </h2>
   );
 }
 
@@ -221,9 +234,67 @@ function PhaseCard({
 
 // ─── ServiceCard ──────────────────────────────────────────────────────────────
 
-function ServiceCard({ service }: { service: { label: string; seed: string } }) {
+function ServiceCard({
+  service,
+  flipped,
+  onFlip,
+}: {
+  service: { label: string; seed: string; descriptor: string; description: string };
+  flipped: boolean;
+  onFlip: () => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
+  const [hovered, setHovered] = useState(false);
+  const directionRef = useRef<1 | -1>(-1);
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const rotX = useSpring(mouseX, { stiffness: 90, damping: 18, mass: 0.6 });
+  const rotY = useSpring(mouseY, { stiffness: 90, damping: 18, mass: 0.6 });
+
+  // Idle oscillation when card is resting
+  useEffect(() => {
+    if (hovered || flipped) return;
+    let frame: number;
+    const start = performance.now();
+    function tick() {
+      const t = (performance.now() - start) / 1000;
+      mouseY.set(Math.sin(t * 0.65) * 5);
+      mouseX.set(Math.sin(t * 0.38 + 1) * 2.5);
+      frame = requestAnimationFrame(tick);
+    }
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [hovered, flipped, mouseX, mouseY]);
+
+  // Reset tilt when flipped from outside
+  useEffect(() => {
+    if (flipped) { mouseX.set(0); mouseY.set(0); }
+  }, [flipped, mouseX, mouseY]);
+
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (flipped) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(-y * 16);
+    mouseY.set(x * 16);
+  }
+
+  function handleMouseLeave() {
+    setHovered(false);
+    if (!flipped) { mouseX.set(0); mouseY.set(0); }
+  }
+
+  function handleClick(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    directionRef.current = x < 0.5 ? -1 : 1;
+    mouseX.set(0);
+    mouseY.set(0);
+    onFlip();
+  }
 
   return (
     <motion.div
@@ -234,42 +305,129 @@ function ServiceCard({ service }: { service: { label: string; seed: string } }) 
       animate={inView ? "visible" : "hidden"}
     >
       <div
-        style={{
-          position: "relative",
-          width: "100%",
-          aspectRatio: "4/3",
-          overflow: "hidden",
-          background: "var(--color-line)",
-        }}
+        style={{ perspective: "900px" }}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={handleMouseLeave}
+        onClick={(e) => handleClick(e)}
       >
-        <Image
-          src={`https://picsum.photos/seed/${service.seed}/800/600`}
-          alt={service.label}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover"
-          style={{ transition: "transform 600ms ease" }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLImageElement).style.transform = "scale(1.04)";
+        {/* Tilt wrapper — driven by spring motion values */}
+        <motion.div
+          style={{
+            rotateX: rotX,
+            rotateY: rotY,
+            transformStyle: "preserve-3d",
+            cursor: "pointer",
+            willChange: "transform",
           }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLImageElement).style.transform = "scale(1)";
-          }}
-        />
+        >
+          {/* Flip element */}
+          <motion.div
+            animate={{ rotateY: flipped ? directionRef.current * 180 : 0 }}
+            transition={{ duration: 0.9, ease: [0.4, 0, 0.2, 1] }}
+            style={{ transformStyle: "preserve-3d", position: "relative" }}
+          >
+            {/* Front face */}
+            <div style={{ backfaceVisibility: "hidden" }}>
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  aspectRatio: "4/3",
+                  overflow: "hidden",
+                  background: "var(--color-line)",
+                }}
+              >
+                <Image
+                  src={`https://picsum.photos/seed/${service.seed}/800/600`}
+                  alt={service.label}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover"
+                />
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "baseline",
+                  justifyContent: "space-between",
+                  marginTop: "1rem",
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: "var(--font-hanken, sans-serif)",
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    fontWeight: 400,
+                    color: "var(--color-ink)",
+                  }}
+                >
+                  {service.label}
+                </p>
+                <span
+                  style={{
+                    fontFamily: "var(--font-hanken, sans-serif)",
+                    fontSize: "0.5rem",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                    color: "var(--color-muted)",
+                    flexShrink: 0,
+                    marginLeft: "0.5rem",
+                  }}
+                >
+                  tap to reveal
+                </span>
+              </div>
+            </div>
+
+            {/* Back face */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                backfaceVisibility: "hidden",
+                transform: "rotateY(-180deg)",
+                background: "#B8936A",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "1.5rem",
+                textAlign: "center",
+                gap: "0.75rem",
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: "var(--font-hanken, sans-serif)",
+                  fontSize: "0.9375rem",
+                  fontWeight: 600,
+                  color: "var(--color-ink)",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {service.label}
+              </p>
+              <p
+                style={{
+                  fontFamily: "var(--font-hanken, sans-serif)",
+                  fontSize: "0.875rem",
+                  lineHeight: 1.75,
+                  color: "#4A3018",
+                  fontWeight: 300,
+                  maxWidth: "240px",
+                  textAlign: "center",
+                }}
+              >
+                {service.description}
+              </p>
+            </div>
+          </motion.div>
+        </motion.div>
       </div>
-      <p
-        style={{
-          fontFamily: "var(--font-hanken, sans-serif)",
-          fontSize: "0.75rem",
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-          fontWeight: 400,
-          color: "var(--color-ink)",
-          marginTop: "1rem",
-        }}
-      >
-        {service.label}
-      </p>
     </motion.div>
   );
 }
@@ -277,15 +435,13 @@ function ServiceCard({ service }: { service: { label: string; seed: string } }) 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AboutPage() {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const isHeroInView = useInView(heroRef, { once: true });
+  const [flippedIndex, setFlippedIndex] = useState<number | null>(null);
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--color-bg)" }}>
 
       {/* ── Hero manifesto ─────────────────────────────────────────────── */}
       <section
-        ref={heroRef}
         className="max-sm:!px-5 max-sm:!pt-28 max-sm:!pb-16"
         style={{
           maxWidth: "1200px",
@@ -307,84 +463,6 @@ export default function AboutPage() {
           <WordReveal text="We design spaces that are made to be inhabited, not admired." />
         </p>
 
-        <motion.div
-          variants={fadeUp}
-          custom={0.35}
-          initial="hidden"
-          animate={isHeroInView ? "visible" : "hidden"}
-          className="flex-wrap gap-8 max-sm:flex-col max-sm:gap-6"
-          style={{ marginTop: "4rem", display: "flex", gap: "4rem" }}
-        >
-          <div>
-            <p
-              style={{
-                fontFamily: "var(--font-hanken, sans-serif)",
-                fontSize: "0.625rem",
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: "var(--color-muted)",
-                marginBottom: "0.5rem",
-              }}
-            >
-              Founded
-            </p>
-            <p
-              style={{
-                fontFamily: "var(--font-hanken, sans-serif)",
-                fontSize: "0.8125rem",
-                color: "var(--color-ink)",
-              }}
-            >
-              2010, Marbella
-            </p>
-          </div>
-          <div>
-            <p
-              style={{
-                fontFamily: "var(--font-hanken, sans-serif)",
-                fontSize: "0.625rem",
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: "var(--color-muted)",
-                marginBottom: "0.5rem",
-              }}
-            >
-              Practice
-            </p>
-            <p
-              style={{
-                fontFamily: "var(--font-hanken, sans-serif)",
-                fontSize: "0.8125rem",
-                color: "var(--color-ink)",
-              }}
-            >
-              Solo practice
-            </p>
-          </div>
-          <div>
-            <p
-              style={{
-                fontFamily: "var(--font-hanken, sans-serif)",
-                fontSize: "0.625rem",
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: "var(--color-muted)",
-                marginBottom: "0.5rem",
-              }}
-            >
-              Focus
-            </p>
-            <p
-              style={{
-                fontFamily: "var(--font-hanken, sans-serif)",
-                fontSize: "0.8125rem",
-                color: "var(--color-ink)",
-              }}
-            >
-              Mediterranean + Europe
-            </p>
-          </div>
-        </motion.div>
       </section>
 
       {/* ── Philosophy ─────────────────────────────────────────────────── */}
@@ -508,32 +586,19 @@ export default function AboutPage() {
           }}
           className="max-sm:!grid-cols-1 max-md:!grid-cols-2"
         >
-          {services.map((service) => (
-            <ServiceCard key={service.label} service={service} />
+          {services.map((service, i) => (
+            <ServiceCard
+              key={service.label}
+              service={service}
+              flipped={flippedIndex === i}
+              onFlip={() => setFlippedIndex(flippedIndex === i ? null : i)}
+            />
           ))}
         </div>
       </section>
 
-      {/* ── Collaborators marquee ───────────────────────────────────────── */}
-      <div
-        style={{ marginTop: "5rem" }}
-        className="py-10 border-t border-b border-[var(--color-line)] overflow-hidden max-sm:mt-10"
-      >
-        <div className="flex gap-0 animate-marquee whitespace-nowrap">
-          {[...collaborators, ...collaborators, ...collaborators, ...collaborators].map((name, i) => (
-            <span
-              key={i}
-              className="inline-flex items-center text-[0.75rem] tracking-[0.25em] uppercase px-10"
-              style={{ color: "var(--color-muted)", fontFamily: "var(--font-hanken, sans-serif)" }}
-            >
-              {name}
-              <span
-                className="mx-10 inline-block w-1 h-1 rounded-full bg-[var(--color-accent)]"
-                aria-hidden="true"
-              />
-            </span>
-          ))}
-        </div>
+      <div style={{ marginTop: "5rem" }} className="max-sm:mt-10">
+        <Marquee />
       </div>
 
       {/* ── Footer ─────────────────────────────────────────────────────── */}

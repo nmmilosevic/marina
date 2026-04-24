@@ -7,6 +7,7 @@ import { motion, useInView } from "framer-motion";
 import { getProjectBySlug, getAdjacentProject } from "@/data/projects";
 import { useTransition } from "@/context/TransitionContext";
 import ProjectGallery from "@/components/ProjectGallery";
+import Marquee from "@/components/Marquee";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -157,7 +158,7 @@ export default function ProjectPage({ params }: PageProps) {
         />
 
         {/* Back link — aligned to the 1200px grid */}
-        <div className="absolute top-20 z-10" style={{ left: 0, right: 0, maxWidth: "1200px", margin: "0 auto", padding: "0 48px" }}>
+        <div className="absolute top-20 z-10 max-sm:!px-5" style={{ left: 0, right: 0, maxWidth: "1200px", margin: "0 auto", padding: "0 48px" }}>
           <button
             onClick={handleBack}
             className="link-underline text-[0.625rem] tracking-[0.18em] uppercase text-white hover:text-[var(--color-accent)] transition-colors duration-300"
@@ -169,7 +170,7 @@ export default function ProjectPage({ params }: PageProps) {
         </div>
 
         {/* Hero title overlay */}
-        <div className="absolute bottom-10 z-10" style={{ left: 0, right: 0, maxWidth: "1200px", margin: "0 auto", padding: "0 48px" }}>
+        <div className="absolute bottom-10 z-10 max-sm:!px-5" style={{ left: 0, right: 0, maxWidth: "1200px", margin: "0 auto", padding: "0 48px" }}>
           <h1
             className="font-display text-4xl md:text-6xl lg:text-7xl uppercase tracking-widest leading-none"
             style={{ fontFamily: "var(--font-hanken, sans-serif)" }}
@@ -200,7 +201,7 @@ export default function ProjectPage({ params }: PageProps) {
       </div>
 
       {/* Text content — 6rem top and bottom so gallery starts with a full gap below */}
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "6rem 48px 6rem" }}>
+      <div className="max-sm:!px-5 max-sm:!py-12" style={{ maxWidth: "1200px", margin: "0 auto", padding: "6rem 48px 6rem" }}>
         <div className="flex flex-col md:flex-row gap-12 lg:gap-20">
           {/* Left: metadata */}
           <motion.div
@@ -256,9 +257,11 @@ export default function ProjectPage({ params }: PageProps) {
       </div>
 
       {/* Gallery — outside text container so content bottom padding creates the gap */}
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 48px 6rem" }}>
+      <div className="max-sm:!px-5 max-sm:!pb-12" style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 48px 6rem" }}>
         <ProjectGallery images={project.images} title={project.title} />
       </div>
+
+      <Marquee />
 
       {/* Next project teaser */}
       <div style={{ borderTop: "1px solid var(--color-line)" }}>
@@ -270,6 +273,7 @@ export default function ProjectPage({ params }: PageProps) {
           aria-label={`Next project: ${nextProject.title}`}
         >
           <div
+            className="max-sm:!px-5 max-sm:!py-8 max-sm:!flex-col max-sm:!items-start"
             style={{
               maxWidth: "1200px",
               margin: "0 auto",
@@ -287,7 +291,7 @@ export default function ProjectPage({ params }: PageProps) {
               Next Project
             </span>
             <span
-              className="group-hover:text-[var(--color-bg)] transition-colors duration-500"
+              className="group-hover:text-[var(--color-bg)] transition-colors duration-500 max-sm:!text-2xl"
               style={{ fontSize: "2.5rem", textTransform: "uppercase", letterSpacing: "0.12em", fontFamily: "var(--font-hanken, sans-serif)", color: "var(--color-ink)" }}
             >
               <NextProjectTitle text={nextProject.title} />
