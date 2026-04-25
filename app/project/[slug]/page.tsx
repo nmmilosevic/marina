@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, use, useRef } from "react";
+import { useEffect, use, useRef, useCallback } from "react";
 import { notFound, useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, useInView } from "framer-motion";
@@ -114,9 +114,25 @@ export default function ProjectPage({ params }: PageProps) {
   const router = useRouter();
   const { startTransition, endTransition } = useTransition();
 
+  const heroReadyRef = useRef(false);
+
+  // End transition when hero image loads — keeps overlay covering until content is visible
+  const handleHeroLoad = useCallback(() => {
+    if (heroReadyRef.current) return;
+    heroReadyRef.current = true;
+    endTransition();
+  }, [endTransition]);
+
+  // Fallback: never stay covered more than 2s regardless of image load
   useEffect(() => {
-    const timer = setTimeout(() => endTransition(), 100);
-    return () => clearTimeout(timer);
+    heroReadyRef.current = false;
+    const t = setTimeout(() => {
+      if (!heroReadyRef.current) {
+        heroReadyRef.current = true;
+        endTransition();
+      }
+    }, 2000);
+    return () => clearTimeout(t);
   }, [endTransition]);
 
   useEffect(() => {
@@ -155,19 +171,8 @@ export default function ProjectPage({ params }: PageProps) {
           sizes="100vw"
           className="object-cover"
           priority
+          onLoad={handleHeroLoad}
         />
-
-        {/* Back link — aligned to the 1200px grid */}
-        <div className="absolute top-20 z-10 max-sm:!px-5" style={{ left: 0, right: 0, maxWidth: "1200px", margin: "0 auto", padding: "0 48px" }}>
-          <button
-            onClick={handleBack}
-            className="link-underline text-[0.625rem] tracking-[0.18em] uppercase text-white hover:text-[var(--color-accent)] transition-colors duration-300"
-            style={{ fontFamily: "var(--font-hanken, sans-serif)" }}
-            aria-label="Back to work"
-          >
-            ← Work
-          </button>
-        </div>
 
         {/* Hero title overlay */}
         <div className="absolute bottom-10 z-10 max-sm:!px-5" style={{ left: 0, right: 0, maxWidth: "1200px", margin: "0 auto", padding: "0 48px" }}>
@@ -263,39 +268,81 @@ export default function ProjectPage({ params }: PageProps) {
 
       <Marquee />
 
-      {/* Next project teaser */}
+      {/* Next project */}
       <div style={{ borderTop: "1px solid var(--color-line)" }}>
         <button
           onClick={handleNextProject}
           data-cursor="view"
-          className="w-full group hover:bg-[var(--color-ink)] transition-colors duration-500"
-          style={{ background: "transparent" }}
           aria-label={`Next project: ${nextProject.title}`}
+          style={{ display: "block", width: "100%", background: "none", border: "none", padding: 0, cursor: "none", textAlign: "left" }}
         >
           <div
-            className="max-sm:!px-5 max-sm:!py-8 max-sm:!flex-col max-sm:!items-start"
-            style={{
-              maxWidth: "1200px",
-              margin: "0 auto",
-              padding: "4rem 48px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "1rem",
-            }}
+            className="max-sm:!px-5 max-sm:!pt-10 max-sm:!pb-16"
+            style={{ maxWidth: "1200px", margin: "0 auto", padding: "5rem 48px 6rem" }}
           >
-            <span
-              className="group-hover:text-[var(--color-bg)] transition-colors duration-500"
-              style={{ fontSize: "0.625rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--color-muted)", fontFamily: "var(--font-hanken, sans-serif)" }}
-            >
-              Next Project
-            </span>
-            <span
-              className="group-hover:text-[var(--color-bg)] transition-colors duration-500 max-sm:!text-2xl"
-              style={{ fontSize: "2.5rem", textTransform: "uppercase", letterSpacing: "0.12em", fontFamily: "var(--font-hanken, sans-serif)", color: "var(--color-ink)" }}
-            >
-              <NextProjectTitle text={nextProject.title} />
-            </span>
+            {/* Label row */}
+            <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", marginBottom: "2rem" }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-hanken, sans-serif)",
+                  fontSize: "0.5625rem",
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--color-muted)",
+                }}
+              >
+                Next Project
+              </span>
+              <span
+                style={{
+                  display: "block",
+                  flex: 1,
+                  height: "1px",
+                  background: "var(--color-line)",
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: "var(--font-hanken, sans-serif)",
+                  fontSize: "0.5625rem",
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--color-muted)",
+                }}
+              >
+                {nextProject.location}
+              </span>
+            </div>
+
+            {/* Title with underline reveal */}
+            <div className="group/next" style={{ display: "inline-block" }}>
+              <span
+                className="max-sm:!text-[2rem]"
+                style={{
+                  fontFamily: "var(--font-hanken, sans-serif)",
+                  fontSize: "clamp(2.25rem, 5vw, 4rem)",
+                  fontWeight: 300,
+                  letterSpacing: "-0.02em",
+                  color: "var(--color-ink)",
+                  lineHeight: 1.05,
+                  display: "block",
+                }}
+              >
+                <NextProjectTitle text={nextProject.title} />
+              </span>
+              {/* Underline that grows on hover of the whole button */}
+              <span
+                className="[button:hover_&]:w-full"
+                style={{
+                  display: "block",
+                  height: "1px",
+                  background: "var(--color-ink)",
+                  width: 0,
+                  marginTop: "0.5rem",
+                  transition: "width 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+                }}
+              />
+            </div>
           </div>
         </button>
       </div>

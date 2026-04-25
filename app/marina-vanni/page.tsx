@@ -3,7 +3,9 @@
 import Image from "next/image";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { useEffect } from "react";
 import Marquee from "@/components/Marquee";
+import { useTransition } from "@/context/TransitionContext";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -110,6 +112,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function MarinaVanniPage() {
+  const { endTransition } = useTransition();
+  useEffect(() => { const t = setTimeout(endTransition, 100); return () => clearTimeout(t); }, [endTransition]);
+
   return (
     <main style={{ minHeight: "100vh", background: "var(--color-bg)" }}>
 

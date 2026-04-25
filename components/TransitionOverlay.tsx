@@ -4,78 +4,76 @@ import { useEffect, useRef } from "react";
 import { useTransition } from "@/context/TransitionContext";
 
 export default function TransitionOverlay() {
-  const { isTransitioning, direction, endTransition } = useTransition();
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const prevTransitioning = useRef(false);
+  const { isTransitioning, direction } = useTransition();
+  const elRef = useRef<HTMLDivElement>(null);
+  const coveredRef = useRef(false);
+  const pendingRef = useRef(false);
+  const runningRef = useRef(false);
+  const dirRef = useRef<"forward" | "back">("forward");
+  const tidRef = useRef(0);
+
+  function wipeOut(el: HTMLDivElement, tid: number) {
+    if (!coveredRef.current || tid !== tidRef.current) return;
+    coveredRef.current = false;
+
+    const dir = dirRef.current;
+    el.style.transition = "clip-path 500ms cubic-bezier(0.76, 0, 0.24, 1)";
+    el.style.clipPath = dir === "forward" ? "inset(0 0 0 100%)" : "inset(0 100% 0 0)";
+
+    setTimeout(() => {
+      el.style.display = "none";
+      el.style.clipPath = dir === "forward" ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)";
+      runningRef.current = false;
+      pendingRef.current = false;
+    }, 520);
+  }
 
   useEffect(() => {
-    const el = overlayRef.current;
+    const el = elRef.current;
     if (!el) return;
 
-    if (isTransitioning && !prevTransitioning.current) {
-      // Start: wipe in from left (forward) or from right (back)
-      prevTransitioning.current = true;
+    if (isTransitioning) {
+      if (runningRef.current) return;
+      runningRef.current = true;
+      coveredRef.current = false;
+      pendingRef.current = false;
+      dirRef.current = direction;
+      const tid = ++tidRef.current;
 
-      if (direction === "forward") {
-        // Starts invisible (clipped on right), sweeps left to right covering screen
-        el.style.transition = "none";
-        el.style.clipPath = "inset(0 100% 0 0)";
-        el.style.display = "block";
+      el.style.transition = "none";
+      el.style.clipPath = direction === "forward" ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)";
+      el.style.display = "block";
 
+      requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            el.style.transition =
-              "clip-path 500ms cubic-bezier(0.76, 0, 0.24, 1)";
-            el.style.clipPath = "inset(0 0% 0 0)";
+          el.style.transition = "clip-path 500ms cubic-bezier(0.76, 0, 0.24, 1)";
+          el.style.clipPath = "inset(0 0% 0 0)";
 
-            // After fully covering, wipe off to the right
-            setTimeout(() => {
-              el.style.transition =
-                "clip-path 500ms cubic-bezier(0.76, 0, 0.24, 1)";
-              el.style.clipPath = "inset(0 0 0 100%)";
+          // Mark as fully covered after animation
+          setTimeout(() => {
+            coveredRef.current = true;
+            if (pendingRef.current) wipeOut(el, tid);
+          }, 530);
 
-              setTimeout(() => {
-                el.style.display = "none";
-                el.style.clipPath = "inset(0 100% 0 0)";
-                prevTransitioning.current = false;
-                endTransition();
-              }, 520);
-            }, 520);
-          });
+          // Safety fallback: never stay covered more than 2.5s
+          setTimeout(() => { wipeOut(el, tid); }, 2500);
         });
+      });
+    } else {
+      if (!runningRef.current) return;
+      const tid = tidRef.current;
+      if (coveredRef.current) {
+        wipeOut(el, tid);
       } else {
-        // Back: wipe in from right to left
-        el.style.transition = "none";
-        el.style.clipPath = "inset(0 0 0 100%)";
-        el.style.display = "block";
-
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            el.style.transition =
-              "clip-path 500ms cubic-bezier(0.76, 0, 0.24, 1)";
-            el.style.clipPath = "inset(0 0% 0 0)";
-
-            setTimeout(() => {
-              el.style.transition =
-                "clip-path 500ms cubic-bezier(0.76, 0, 0.24, 1)";
-              el.style.clipPath = "inset(0 100% 0 0)";
-
-              setTimeout(() => {
-                el.style.display = "none";
-                el.style.clipPath = "inset(0 0 0 100%)";
-                prevTransitioning.current = false;
-                endTransition();
-              }, 520);
-            }, 520);
-          });
-        });
+        // Still covering — wipe out as soon as covered
+        pendingRef.current = true;
       }
     }
-  }, [isTransitioning, direction, endTransition]);
+  }, [isTransitioning, direction]);
 
   return (
     <div
-      ref={overlayRef}
+      ref={elRef}
       aria-hidden="true"
       style={{
         position: "fixed",

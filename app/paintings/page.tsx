@@ -2,36 +2,15 @@
 
 import Image from "next/image";
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
-import Marquee from "@/components/Marquee";
+import { useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import PageFooter from "@/components/PageFooter";
+import { useTransition } from "@/context/TransitionContext";
+import { paintings } from "@/data/paintings";
 
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
-const paintings = [
-  { file: "painting_02", title: "The Wall",         medium: "Gouache on paper",             year: "2021" },
-  { file: "painting_03", title: "The Mountains",    medium: "Watercolor on paper",           year: "2018" },
-  { file: "painting_04", title: "Hoku by the Lake", medium: "Watercolor on paper",           year: "2025" },
-  { file: "painting_05", title: "The Fog",          medium: "Watercolor & Gouache on paper", year: "2022" },
-  { file: "painting_06", title: "Exploration I",    medium: "Mixed media on paper",          year: ""     },
-  { file: "painting_07", title: "Exploration II",   medium: "Mixed media on paper",          year: ""     },
-  { file: "painting_08", title: "Exploration III",  medium: "Mixed media on paper",          year: ""     },
-  { file: "painting_09", title: "Exploration IV",   medium: "Mixed media on paper",          year: ""     },
-  { file: "painting_10", title: "Exploration V",    medium: "Mixed media on paper",          year: ""     },
-  { file: "painting_11", title: "Exploration VI",   medium: "Mixed media on paper",          year: ""     },
-  { file: "painting_12", title: "Marbella",         medium: "Ink on paper",                  year: ""     },
-  { file: "painting_13", title: "Plaza",            medium: "Ink on paper",                  year: ""     },
-  { file: "painting_14", title: "City Mural I",     medium: "Ink on paper",                  year: ""     },
-  { file: "painting_15", title: "City Mural II",    medium: "Ink on paper",                  year: ""     },
-  { file: "painting_16", title: "Rooftops",         medium: "Ink on paper",                  year: ""     },
-  { file: "painting_17", title: "Skyline",          medium: "Ink on paper",                  year: ""     },
-  { file: "painting_18", title: "Piazza",           medium: "Ink on paper",                  year: ""     },
-  { file: "painting_19", title: "Red Door",         medium: "Ink & watercolor on paper",     year: ""     },
-  { file: "painting_20", title: "Green Kitchen",    medium: "Ink & watercolor on paper",     year: ""     },
-  { file: "painting_21", title: "Old House",        medium: "Ink on paper",                  year: ""     },
-  { file: "painting_22", title: "From Above",       medium: "Ink on paper",                  year: ""     },
-];
-
-function PaintingCard({ file, title, medium, year }: { file: string; title: string; medium: string; year: string }) {
+function PaintingCard({ file, title, medium, year, onClick }: { file: string; title: string; medium: string; year: string; onClick: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
 
@@ -42,53 +21,64 @@ function PaintingCard({ file, title, medium, year }: { file: string; title: stri
       animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 1.1, ease: EASE }}
     >
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          aspectRatio: "2/3",
-          overflow: "hidden",
-          background: "var(--color-bg)",
-        }}
+      <button
+        onClick={onClick}
+        data-cursor="view"
+        aria-label={`View painting: ${title}`}
+        style={{ display: "block", width: "100%", textAlign: "left", background: "none", border: "none", padding: 0, cursor: "none" }}
       >
-        <Image
-          src={`/paintings/cropped/${file}.jpeg`}
-          alt={`Marina Vanni — ${title}`}
-          fill
-          sizes="(max-width: 640px) 100vw, 50vw"
-          className="object-cover"
-        />
-      </div>
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            aspectRatio: "2/3",
+            overflow: "hidden",
+            background: "var(--color-bg)",
+          }}
+        >
+          <Image
+            src={`/paintings/cropped/${file}.jpeg`}
+            alt={`Marina Vanni — ${title}`}
+            fill
+            sizes="(max-width: 640px) 100vw, 50vw"
+            className="object-cover transition-transform duration-700 hover:scale-[1.03]"
+          />
+        </div>
 
-      <div style={{ marginTop: "0.875rem" }}>
-        <p
-          style={{
-            fontFamily: "var(--font-hanken, sans-serif)",
-            fontSize: "0.8125rem",
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "var(--color-ink)",
-            fontWeight: 600,
-          }}
-        >
-          {title}
-        </p>
-        <p
-          style={{
-            fontFamily: "var(--font-hanken, sans-serif)",
-            fontSize: "0.6875rem",
-            color: "var(--color-muted)",
-            marginTop: "0.125rem",
-          }}
-        >
-          {medium}{year ? `, ${year}` : ""}
-        </p>
-      </div>
+        <div style={{ marginTop: "0.875rem" }}>
+          <p
+            style={{
+              fontFamily: "var(--font-hanken, sans-serif)",
+              fontSize: "0.8125rem",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "var(--color-ink)",
+              fontWeight: 600,
+            }}
+          >
+            {title}
+          </p>
+          <p
+            style={{
+              fontFamily: "var(--font-hanken, sans-serif)",
+              fontSize: "0.6875rem",
+              color: "var(--color-muted)",
+              marginTop: "0.125rem",
+            }}
+          >
+            {medium}{year ? `, ${year}` : ""}
+          </p>
+        </div>
+      </button>
     </motion.div>
   );
 }
 
 export default function PaintingsPage() {
+  const { endTransition, startTransition } = useTransition();
+  const router = useRouter();
+  useEffect(() => { const t = setTimeout(endTransition, 100); return () => clearTimeout(t); }, [endTransition]);
+
   return (
     <main style={{ minHeight: "100vh", background: "var(--color-bg)" }}>
 
@@ -148,48 +138,22 @@ export default function PaintingsPage() {
           className="max-sm:!grid-cols-1 max-sm:!gap-y-12"
         >
           {paintings.map(({ file, title, medium, year }) => (
-            <PaintingCard key={file} file={file} title={title} medium={medium} year={year} />
+            <PaintingCard
+              key={file}
+              file={file}
+              title={title}
+              medium={medium}
+              year={year}
+              onClick={async () => {
+                await startTransition(file, null, "forward");
+                router.push(`/painting/${file}`);
+              }}
+            />
           ))}
         </div>
       </section>
 
-      <Marquee />
-
-      {/* Footer */}
-      <footer
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "3rem 48px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-        className="max-sm:!px-5"
-      >
-        <span
-          style={{
-            fontFamily: "var(--font-hanken, sans-serif)",
-            fontSize: "0.875rem",
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            color: "var(--color-ink)",
-          }}
-        >
-          Marina Vanni
-        </span>
-        <span
-          style={{
-            fontFamily: "var(--font-hanken, sans-serif)",
-            fontSize: "0.625rem",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: "var(--color-muted)",
-          }}
-        >
-          Marbella, 2026
-        </span>
-      </footer>
+      <PageFooter />
     </main>
   );
 }

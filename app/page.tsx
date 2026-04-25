@@ -1,10 +1,15 @@
 "use client";
 
+import { useEffect } from "react";
 import { projects } from "@/data/projects";
 import ProjectRow from "@/components/ProjectRow";
 import Marquee from "@/components/Marquee";
+import { useTransition } from "@/context/TransitionContext";
 
 export default function HomePage() {
+  const { endTransition } = useTransition();
+  useEffect(() => { const t = setTimeout(endTransition, 100); return () => clearTimeout(t); }, [endTransition]);
+
   return (
     <main style={{ minHeight: "100vh" }}>
       {/* Container: identical max-width and padding as Nav — aligns perfectly */}

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Marquee from "@/components/Marquee";
+import { useTransition } from "@/context/TransitionContext";
 
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
@@ -63,6 +64,8 @@ function WordReveal({ text, style }: { text: string; style?: React.CSSProperties
 }
 
 export default function ContactPage() {
+  const { endTransition } = useTransition();
+  useEffect(() => { const t = setTimeout(endTransition, 100); return () => clearTimeout(t); }, [endTransition]);
   const [form, setForm] = useState<FormData>(empty);
   const [focused, setFocused] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
