@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useEffect, use, useState } from "react";
-import { notFound, useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import { paintings } from "@/data/paintings";
 import { useTransition } from "@/context/TransitionContext";
 import PageFooter from "@/components/PageFooter";
@@ -160,7 +160,6 @@ function EnquiryForm({ paintingTitle }: { paintingTitle: string }) {
 export default function PaintingDetailPage({ params }: PageProps) {
   const { id } = use(params);
   const { endTransition } = useTransition();
-  const router = useRouter();
 
   useEffect(() => {
     const t = setTimeout(endTransition, 100);

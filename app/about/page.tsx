@@ -37,8 +37,8 @@ const processPhases = [
 
 const services = [
   {
-    index: "01",
-    title: "Residential\nDesign",
+    index: "",
+    title: "Interior Design",
     subtitle: "Homes & Private Residences",
     description: "Home design is deeply personal. The studio works around each client's tastes and lifestyle, layering in the spatial instincts of a skilled designer to produce environments that feel both deliberate and alive. Not a delivered product. A creative process you move through together.",
     tagline: "Passion and professionalism in balance. Every time.",
@@ -46,11 +46,11 @@ const services = [
     bg: "#EDE4D8",
     color: "var(--color-ink)",
     mutedColor: "var(--color-muted)",
-    span: 2,
+    span: 1,
   },
   {
-    index: "02",
-    title: "Commercial\nProjects",
+    index: "",
+    title: "Interior Architecture",
     subtitle: "Hotels, F&B & Retail",
     description: "Commercial work demands a different discipline. Deadlines, budgets, and quality control run alongside creative vision. A full team handles every project end to end — from a single decoration brief to a complete structural refurbishment.",
     tagline: "Concept to construction. No handoffs, no gaps.",
@@ -61,8 +61,8 @@ const services = [
     span: 1,
   },
   {
-    index: "03",
-    title: "Refurbishment\n& Renovation",
+    index: "",
+    title: "Home Styling",
     subtitle: "Full-Scope Transformation",
     description: "Renovation work reveals what a space is already trying to be. The studio's approach draws from a rich textural and tonal palette — natural materials inside and out — to create a composed dialogue between existing architecture, spatial form, and furniture.",
     tagline: "What is already there, made unmissable.",
@@ -71,18 +71,6 @@ const services = [
     color: "var(--color-ink)",
     mutedColor: "var(--color-muted)",
     span: 1,
-  },
-  {
-    index: "04",
-    title: "Bespoke\nFurniture",
-    subtitle: "Commissions & Limited Editions",
-    description: "The studio sources rare and singular furniture pieces, and also designs one-of-a-kind limited editions produced to measure by skilled craftsmen. These are objects made to carry weight in a room — pieces that create impact, hold attention, and are made for nowhere else.",
-    tagline: "Pieces that exist once. Designed for exactly one room.",
-    image: "https://picsum.photos/seed/mv-furniture/1200/700",
-    bg: "#EDE4D8",
-    color: "var(--color-ink)",
-    mutedColor: "var(--color-muted)",
-    span: 2,
   },
 ];
 
@@ -285,9 +273,6 @@ function BentoCard({
       {/* Text */}
       <div style={{ padding: "clamp(1.75rem, 2.5vw, 2.5rem)", display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1, gap: "1.25rem" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <p style={{ fontFamily: "monospace", fontSize: "0.625rem", letterSpacing: "0.2em", color: service.mutedColor }}>
-            {service.index} —
-          </p>
           <div>
             <h3
               style={{
@@ -444,7 +429,7 @@ export default function AboutPage() {
           className="max-sm:!grid-cols-1"
         >
           {services.map((service, i) => (
-            <BentoCard key={service.index} service={service} delay={i * 0.08} />
+            <BentoCard key={service.title} service={service} delay={i * 0.08} />
           ))}
         </div>
       </section>

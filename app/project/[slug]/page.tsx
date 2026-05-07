@@ -148,12 +148,6 @@ export default function ProjectPage({ params }: PageProps) {
 
   const nextProject = getAdjacentProject(slug);
 
-  const handleBack = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    await startTransition("nav", null, "back");
-    router.push("/");
-  };
-
   const handleNextProject = async (e: React.MouseEvent) => {
     e.preventDefault();
     await startTransition(nextProject.slug, null, "forward");
