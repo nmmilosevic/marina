@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useTransition } from "@/context/TransitionContext";
+import { WIPE_EASE, getWipeInDurationMs } from "@/lib/transitionConfig";
 
 export default function TransitionOverlay() {
   const { isTransitioning, direction } = useTransition();
@@ -11,64 +12,138 @@ export default function TransitionOverlay() {
   const runningRef = useRef(false);
   const dirRef = useRef<"forward" | "back">("forward");
   const tidRef = useRef(0);
-
-  function wipeOut(el: HTMLDivElement, tid: number) {
-    if (!coveredRef.current || tid !== tidRef.current) return;
-    coveredRef.current = false;
-
-    const dir = dirRef.current;
-    el.style.transition = "clip-path 500ms cubic-bezier(0.76, 0, 0.24, 1)";
-    el.style.clipPath = dir === "forward" ? "inset(0 0 0 100%)" : "inset(0 100% 0 0)";
-
-    setTimeout(() => {
-      el.style.display = "none";
-      el.style.clipPath = dir === "forward" ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)";
-      runningRef.current = false;
-      pendingRef.current = false;
-    }, 520);
-  }
+  const durationRef = useRef(360);
+  const timeoutIdsRef = useRef<number[]>([]);
 
   useEffect(() => {
-    const el = elRef.current;
-    if (!el) return;
+    if (!elRef.current) return;
+
+    const clearTimeouts = () => {
+      for (const id of timeoutIdsRef.current) window.clearTimeout(id);
+      timeoutIdsRef.current = [];
+    };
+
+    const pushTimeout = (fn: () => void, ms: number) => {
+      const id = window.setTimeout(fn, ms);
+      timeoutIdsRef.current.push(id);
+    };
+
+    function finishOut() {
+      const el = elRef.current;
+      if (!el) return;
+      el.style.display = "none";
+      el.style.transition = "none";
+      el.style.transform = "scaleX(0)";
+      el.style.willChange = "auto";
+      runningRef.current = false;
+      pendingRef.current = false;
+    }
+
+    function wipeOut(wipeTid: number) {
+      const el = elRef.current;
+      if (!el || !coveredRef.current || wipeTid !== tidRef.current) return;
+      coveredRef.current = false;
+
+      const dir = dirRef.current;
+      const duration = durationRef.current;
+      el.style.willChange = "transform";
+      el.style.transformOrigin =
+        dir === "forward" ? "right center" : "left center";
+      el.style.transition = `transform ${duration}ms ${WIPE_EASE}`;
+      el.style.transform = "scaleX(0)";
+
+      const onOutEnd = (ev: TransitionEvent) => {
+        if (ev.propertyName !== "transform" || wipeTid !== tidRef.current) return;
+        el.removeEventListener("transitionend", onOutEnd);
+        finishOut();
+      };
+
+      el.addEventListener("transitionend", onOutEnd);
+      pushTimeout(() => {
+        el.removeEventListener("transitionend", onOutEnd);
+        if (wipeTid === tidRef.current) finishOut();
+      }, duration + 100);
+    }
 
     if (isTransitioning) {
       if (runningRef.current) return;
+      const el = elRef.current;
+      if (!el) return;
       runningRef.current = true;
       coveredRef.current = false;
       pendingRef.current = false;
       dirRef.current = direction;
-      const tid = ++tidRef.current;
+      const wipeTid = ++tidRef.current;
+      clearTimeouts();
 
+      const duration = getWipeInDurationMs();
+      durationRef.current = duration;
+
+      const onInEnd = (ev: TransitionEvent) => {
+        if (ev.propertyName !== "transform") return;
+        const node = elRef.current;
+        if (!node) return;
+        node.removeEventListener("transitionend", onInEnd);
+        if (wipeTid !== tidRef.current) return;
+        coveredRef.current = true;
+        if (pendingRef.current) wipeOut(wipeTid);
+      };
+
+      el.style.willChange = "transform";
       el.style.transition = "none";
-      el.style.clipPath = direction === "forward" ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)";
+      el.style.transformOrigin =
+        direction === "forward" ? "left center" : "right center";
+      el.style.transform = "scaleX(0)";
       el.style.display = "block";
 
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          el.style.transition = "clip-path 500ms cubic-bezier(0.76, 0, 0.24, 1)";
-          el.style.clipPath = "inset(0 0% 0 0)";
-
-          // Mark as fully covered after animation
-          setTimeout(() => {
+      const raf = requestAnimationFrame(() => {
+        const node = elRef.current;
+        if (!node || wipeTid !== tidRef.current) return;
+        node.style.transition = `transform ${duration}ms ${WIPE_EASE}`;
+        node.style.transform = "scaleX(1)";
+        node.addEventListener("transitionend", onInEnd);
+        pushTimeout(() => {
+          const n = elRef.current;
+          if (n) n.removeEventListener("transitionend", onInEnd);
+          if (wipeTid !== tidRef.current) return;
+          if (!coveredRef.current) {
             coveredRef.current = true;
-            if (pendingRef.current) wipeOut(el, tid);
-          }, 530);
-
-          // Safety fallback: never stay covered more than 2.5s
-          setTimeout(() => { wipeOut(el, tid); }, 2500);
-        });
+            if (pendingRef.current) wipeOut(wipeTid);
+          }
+        }, duration + 100);
       });
-    } else {
-      if (!runningRef.current) return;
-      const tid = tidRef.current;
-      if (coveredRef.current) {
-        wipeOut(el, tid);
-      } else {
-        // Still covering — wipe out as soon as covered
-        pendingRef.current = true;
-      }
+
+      pushTimeout(() => {
+        const n = elRef.current;
+        if (n) n.removeEventListener("transitionend", onInEnd);
+        if (wipeTid !== tidRef.current) return;
+        if (coveredRef.current) {
+          wipeOut(wipeTid);
+        } else {
+          coveredRef.current = true;
+          wipeOut(wipeTid);
+        }
+      }, 2200);
+
+      return () => {
+        cancelAnimationFrame(raf);
+        clearTimeouts();
+        const n = elRef.current;
+        if (n) n.removeEventListener("transitionend", onInEnd);
+      };
     }
+
+    if (!runningRef.current) return;
+    const wipeTid = tidRef.current;
+    if (coveredRef.current) {
+      wipeOut(wipeTid);
+    } else {
+      pendingRef.current = true;
+    }
+
+    return () => {
+      clearTimeouts();
+    };
   }, [isTransitioning, direction]);
 
   return (
@@ -82,8 +157,9 @@ export default function TransitionOverlay() {
         backgroundColor: "#111111",
         pointerEvents: "none",
         display: "none",
-        clipPath: "inset(0 100% 0 0)",
-        willChange: "clip-path",
+        transform: "scaleX(0)",
+        transformOrigin: "left center",
+        willChange: "auto",
       }}
     />
   );

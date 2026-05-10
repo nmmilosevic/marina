@@ -6,6 +6,9 @@ import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTransition } from "@/context/TransitionContext";
 
+/** Top-left header wordmark (home link). */
+const SITE_WORDMARK = "OCCHI DI VANNI";
+
 const navLinks = [
   { label: "Work",         href: "/" },
   { label: "Studio",       href: "/about" },
@@ -69,7 +72,7 @@ export default function Nav() {
               lineHeight: 1,
             }}
           >
-            <span className="nav-weight">Marina Vanni</span>
+            <span className="nav-weight">{SITE_WORDMARK}</span>
           </Link>
 
           <nav
@@ -134,7 +137,7 @@ export default function Nav() {
               lineHeight: 1,
             }}
           >
-            <span className="nav-weight">Marina Vanni</span>
+            <span className="nav-weight">{SITE_WORDMARK}</span>
           </Link>
 
           <button

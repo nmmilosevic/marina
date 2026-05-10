@@ -114,7 +114,7 @@ export default function ContactPage() {
               >
                 <p style={{ ...labelStyle, marginBottom: "0.4rem" }}>Email</p>
                 <a
-                  href="mailto:hello@marinavanni.com"
+                  href="mailto:hi@occhidivanni.com"
                   style={{
                     fontFamily: "var(--font-hanken, sans-serif)",
                     fontSize: "0.9375rem",
@@ -128,7 +128,7 @@ export default function ContactPage() {
                   onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderBottomColor = "var(--color-ink)"; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderBottomColor = "transparent"; }}
                 >
-                  hello@marinavanni.com
+                  hi@occhidivanni.com
                 </a>
               </motion.div>
 

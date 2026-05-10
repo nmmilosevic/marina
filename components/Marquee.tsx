@@ -1,39 +1,39 @@
-const collaborators = [
-  "Cassina",
-  "Kettal",
-  "Molteni&C",
-  "Flos",
-  "Living Divani",
-  "Paola Lenti",
-  "B&B Italia",
-  "Poliform",
-  "Dedar",
-  "Pierre Frey",
-  "Rubelli",
-  "Loro Piana",
-  "Hermès Maison",
-  "Fornasetti",
-  "Liaigre",
-  "Frette",
-];
+import Image from "next/image";
+import { MARQUEE_BRAND_ASSETS } from "@/components/marquee/marqueeBrandAssets";
+
+function MarqueeRow() {
+  return (
+    <div className="flex shrink-0 items-center gap-12 sm:gap-14 md:gap-16 lg:gap-20">
+      {MARQUEE_BRAND_ASSETS.map(({ id, alt, src }) => (
+        <div
+          key={id}
+          className="flex h-11 w-28 shrink-0 items-center justify-center sm:h-12 sm:w-32 md:h-14 md:w-40 lg:h-16 lg:w-44"
+        >
+          <Image
+            src={src}
+            alt={alt}
+            width={220}
+            height={72}
+            className="max-h-full w-full max-w-full object-contain object-center"
+            unoptimized
+            sizes="(max-width: 640px) 112px, (max-width: 1024px) 160px, 176px"
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Marquee() {
   return (
-    <div className="py-10 border-t border-b border-[var(--color-line)] overflow-hidden">
-      <div className="flex gap-0 animate-marquee whitespace-nowrap">
-        {[...collaborators, ...collaborators, ...collaborators, ...collaborators].map((name, i) => (
-          <span
-            key={i}
-            className="inline-flex items-center text-[0.75rem] tracking-[0.25em] uppercase px-10"
-            style={{ color: "var(--color-muted)", fontFamily: "var(--font-hanken, sans-serif)" }}
-          >
-            {name}
-            <span
-              className="mx-10 inline-block w-1 h-1 rounded-full bg-[var(--color-accent)]"
-              aria-hidden="true"
-            />
-          </span>
-        ))}
+    <div
+      className="border-t border-b border-[var(--color-line)] py-14 overflow-hidden sm:py-16 md:py-[4.5rem]"
+      role="region"
+      aria-label="Collaborating brands"
+    >
+      <div className="flex w-max animate-marquee">
+        <MarqueeRow />
+        <MarqueeRow />
       </div>
     </div>
   );

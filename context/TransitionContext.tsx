@@ -1,12 +1,7 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useRef,
-} from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
+import { getNavigateAfterMs } from "@/lib/transitionConfig";
 
 interface SourceRect {
   top: number;
@@ -39,7 +34,6 @@ export function TransitionProvider({
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [clickedSlug, setClickedSlug] = useState<string | null>(null);
   const [sourceRect, setSourceRect] = useState<SourceRect | null>(null);
-  const resolveRef = useRef<(() => void) | null>(null);
 
   const startTransition = useCallback(
     async (
@@ -52,11 +46,8 @@ export function TransitionProvider({
       setDirection(dir);
       setIsTransitioning(true);
       return new Promise<void>((resolve) => {
-        resolveRef.current = resolve;
-        // Auto-resolve after overlay covers screen
-        setTimeout(() => {
-          resolve();
-        }, 540);
+        const ms = getNavigateAfterMs();
+        setTimeout(resolve, ms);
       });
     },
     []
