@@ -14,7 +14,32 @@ export interface Project {
   navTheme: "light" | "dark";
 }
 
+/** Static files in `public/VILLA PREMIUM/` (URL-encoded for Next/Image). */
+function villaPremiumImage(file: string): string {
+  return `/VILLA%20PREMIUM/${encodeURIComponent(file)}`;
+}
+
 export const projects: Project[] = [
+  {
+    slug: "villa-premium",
+    title: "Villa Premium",
+    location: "Marbella, ES",
+    year: "2025",
+    typology: "Private Residence",
+    area: "450 sqm",
+    description:
+      "A contemporary villa interior defined by open living spaces, warm materiality, and calm sightlines. Living and dining zones flow as one sequence; bedrooms layer tactile finishes and controlled daylight for a quiet, residential calm.",
+    heroImage: villaPremiumImage("LIVING.jpg"),
+    images: [
+      villaPremiumImage("DINING.jpg"),
+      villaPremiumImage("01 HAB 1.jpg"),
+      villaPremiumImage("01 HAB 2.jpg"),
+      villaPremiumImage("02 HAB 1.jpg"),
+      villaPremiumImage("02 HAB 2.jpg"),
+    ],
+    videoUrl: null,
+    navTheme: "dark",
+  },
   {
     slug: "villa-portofino",
     title: "Villa Portofino",
