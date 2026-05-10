@@ -163,6 +163,7 @@ export default function ProjectPage({ params }: PageProps) {
           alt={project.title}
           fill
           sizes="100vw"
+          quality={92}
           className="object-cover"
           priority
           onLoad={handleHeroLoad}

@@ -118,7 +118,8 @@ export default function ProjectRow({ project, index }: ProjectRowProps) {
           src={project.heroImage}
           alt={project.title}
           fill
-          sizes="(max-width: 768px) 100vw, 80vw"
+          sizes="(max-width: 768px) 100vw, min(1200px, 92vw)"
+          quality={90}
           className="object-cover"
           style={{
             transform: hovered ? "scale(1.03)" : "scale(1)",

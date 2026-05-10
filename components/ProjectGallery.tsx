@@ -26,11 +26,13 @@ function GalleryImage({
   alt,
   aspectRatio,
   sizes,
+  quality = 90,
 }: {
   src: string;
   alt: string;
   aspectRatio: string;
   sizes: string;
+  quality?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
@@ -49,6 +51,7 @@ function GalleryImage({
         alt={alt}
         fill
         sizes={sizes}
+        quality={quality}
         className="object-cover"
       />
     </motion.div>
@@ -74,7 +77,7 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
             src={images[i]}
             alt={`${title} image${i + 1}`}
             aspectRatio="16/9"
-            sizes="100vw"
+            sizes="(max-width: 768px) 100vw, min(1200px, calc(100vw - 96px))"
           />
         );
         i++;
@@ -86,14 +89,14 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
               src={images[i]}
               alt={`${title} image${i + 1}`}
               aspectRatio="4/3"
-              sizes="50vw"
+              sizes="(max-width: 768px) 50vw, 600px"
             />
             {images[i + 1] ? (
               <GalleryImage
                 src={images[i + 1]}
                 alt={`${title} image${i + 2}`}
                 aspectRatio="4/3"
-                sizes="50vw"
+                sizes="(max-width: 768px) 50vw, 600px"
               />
             ) : (
               <div />
@@ -110,7 +113,7 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
                 src={images[i]}
                 alt={`${title} image${i + 1}`}
                 aspectRatio="4/3"
-                sizes="(max-width: 768px) 100vw, 50vw"
+                sizes="(max-width: 768px) 100vw, 600px"
               />
             </div>
           </div>
